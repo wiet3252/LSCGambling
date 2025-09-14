@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,8 +6,24 @@
     <title>LSC Casino</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading LSC Casino...</p>
+    </div>
+    
+    <!-- Error Modal -->
+    <div id="error-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h3>Error</h3>
+            <p id="error-message"></p>
+        </div>
+    </div>
+    
     <div class="container">
         <!-- Login Form -->
         <div id="login-container" class="form-container">
@@ -19,7 +35,10 @@
                 <div class="form-group">
                     <input type="password" id="password" placeholder="Password" required>
                 </div>
-                <button type="submit">Login</button>
+                <button type="submit" id="login-btn">
+                    <span class="btn-text">Login</span>
+                    <span class="btn-spinner"><i class="fas fa-spinner fa-spin"></i></span>
+                </button>
                 <p>Don't have an account? <a href="#" id="show-signup">Sign up</a></p>
             </form>
         </div>
@@ -37,7 +56,10 @@
                 <div class="form-group">
                     <input type="password" id="confirm-password" placeholder="Confirm Password" required>
                 </div>
-                <button type="submit">Sign Up</button>
+                <button type="submit" id="signup-btn">
+                    <span class="btn-text">Sign Up</span>
+                    <span class="btn-spinner"><i class="fas fa-spinner fa-spin"></i></span>
+                </button>
                 <p>Already have an account? <a href="#" id="show-login">Login</a></p>
             </form>
         </div>
