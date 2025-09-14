@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LSC Casino</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="login-container" class="form-container">
+            <h2>Welcome to LSC Casino</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit">Login</button>
+                <p>Don't have an account? <a href="#" id="show-signup">Sign up</a></p>
+            </form>
+        </div>
+
+        <!-- Signup Form (Hidden by default) -->
+        <div id="signup-container" class="form-container" style="display: none;">
+            <h2>Create Account</h2>
+            <form id="signup-form">
+                <div class="form-group">
+                    <input type="text" id="new-username" placeholder="Choose Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="new-password" placeholder="Choose Password" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+                </div>
+                <button type="submit">Sign Up</button>
+                <p>Already have an account? <a href="#" id="show-login">Login</a></p>
+            </form>
+        </div>
+
+        <!-- Game Selection (Hidden until logged in) -->
+        <div id="game-selection" style="display: none;">
+            <div class="header">
+                <h1>LSC Casino</h1>
+                <div class="balance">Balance: <span id="balance">1000</span> LSC</div>
+                <button id="logout-btn" class="logout-btn">Logout</button>
+            </div>
+            
+            <div class="games-grid">
+                <div class="game-card" id="blackjack-card">
+                    <h2>Blackjack</h2>
+                    <p>Try to get as close to 21 as possible without going over!</p>
+                    <button class="play-btn" onclick="startGame('blackjack')">Play</button>
+                </div>
+                
+                <div class="game-card" id="dice-roll-card">
+                    <h2>Roll or Die</h2>
+                    <p>Roll the dice and win big!</p>
+                    <button class="play-btn" onclick="startGame('dice')">Play</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blackjack Game (Hidden by default) -->
+        <div id="blackjack-game" class="game-container" style="display: none;">
+            <div class="game-header">
+                <h2>Blackjack</h2>
+                <div class="balance">Balance: <span id="blackjack-balance">1000</span> LSC</div>
+            </div>
+            
+            <div class="game-area">
+                <div class="dealer-cards">
+                    <h3>Dealer's Cards</h3>
+                    <div id="dealer-cards" class="cards"></div>
+                    <div id="dealer-score" class="score"></div>
+                </div>
+                
+                <div class="player-cards">
+                    <h3>Your Cards</h3>
+                    <div id="player-cards" class="cards"></div>
+                    <div id="player-score" class="score"></div>
+                </div>
+                
+                <div class="game-controls">
+                    <div class="bet-controls">
+                        <input type="number" id="blackjack-bet" min="10" value="50" step="10">
+                        <button onclick="placeBet()">Place Bet</button>
+                    </div>
+                    <div class="game-buttons" style="display: none;">
+                        <button onclick="hit()">Hit</button>
+                        <button onclick="stand()">Stand</button>
+                        <button onclick="doubleDown()">Double Down</button>
+                    </div>
+                    <div id="blackjack-message"></div>
+                </div>
+            </div>
+            <button class="back-btn" onclick="backToLobby()">Back to Lobby</button>
+        </div>
+
+        <!-- Dice Roll Game (Hidden by default) -->
+        <div id="dice-game" class="game-container" style="display: none;">
+            <div class="game-header">
+                <h2>Roll or Die</h2>
+                <div class="balance">Balance: <span id="dice-balance">1000</span> LSC</div>
+            </div>
+            
+            <div class="game-area">
+                <div id="dice-result" class="dice">
+                    <div class="dice-face" id="dice-1"></div>
+                    <div class="dice-face" id="dice-2"></div>
+                </div>
+                
+                <div class="bet-selection">
+                    <div class="bet-amount">
+                        <label for="dice-bet">Bet Amount:</label>
+                        <input type="number" id="dice-bet" min="10" value="50" step="10">
+                    </div>
+                    
+                    <div class="bet-type">
+                        <h3>Bet on:</h3>
+                        <button class="bet-option" onclick="rollDice('high')">High (11-18)</button>
+                        <button class="bet-option" onclick="rollDice('low')">Low (3-10)</button>
+                        <button class="bet-option" onclick="rollDice('even')">Even</button>
+                        <button class="bet-option" onclick="rollDice('odd')">Odd</button>
+                    </div>
+                </div>
+                
+                <div id="dice-message"></div>
+            </div>
+            <button class="back-btn" onclick="backToLobby()">Back to Lobby</button>
+        </div>
+    </div>
+
+    <script src="js/game.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
