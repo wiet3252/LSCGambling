@@ -273,7 +273,6 @@
             }
         }
 
-        /* Loading spinner */
         .spinner {
             display: none;
             width: 20px;
@@ -288,7 +287,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Responsive adjustments */
         @media (max-width: 480px) {
             .container {
                 padding: 30px 20px;
@@ -385,217 +383,150 @@
         </div>
     </div>
 
-    <!-- Font Awesome for icons -->
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    
-    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script>
-        // Initialize Supabase
         const SUPABASE_URL = 'https://tjbgvmwyllzixyeirwiw.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmd2bXd5bGx6aXh5ZWlyd2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NTE1ODAsImV4cCI6MjA3NDAyNzU4MH0.o7kvQW1I0woi1NI3s8VcToEhT7JCSoJEL20UmpZG-rA';
         
-        // Create a single supabase client for interacting with your database
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: {
-                autoRefreshToken: true,
-                persistSession: true,
-                detectSessionInUrl: true
-            }
+            auth: { persistSession: true }
         });
 
-        // DOM Elements
-        const loginForm = document.getElementById('loginForm');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const togglePasswordBtn = document.getElementById('togglePassword');
-        const loginButton = document.getElementById('loginButton');
-        const buttonText = document.getElementById('buttonText');
-        const spinner = document.getElementById('spinner');
-        const errorMessage = document.getElementById('errorMessage');
-        const successMessage = document.getElementById('successMessage');
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const togglePasswordBtn = document.getElementById('togglePassword');
+            const loginButton = document.getElementById('loginButton');
+            const buttonText = document.getElementById('buttonText');
+            const spinner = document.getElementById('spinner');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
 
-        // Toggle password visibility
-        togglePasswordBtn.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            this.textContent = type === 'password' ? 'Show' : 'Hide';
-        });
+            togglePasswordBtn.addEventListener('click', function() {
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
+                this.textContent = type === 'password' ? 'Show' : 'Hide';
+            });
 
-        // Check if user is already logged in
-        async function checkAuth() {
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session) {
-                    window.location.href = 'dashboard.html';
-                }
-            } catch (error) {
-                console.error('Auth check error:', error.message);
-            }
-        }
-
-        // Handle login form submission
-        async function handleLogin(event) {
-            event.preventDefault();
-            
-            // Reset error messages
-            errorMessage.style.display = 'none';
-            document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
-            
-            // Get form values
-            const email = emailInput.value.trim();
-            const password = passwordInput.value;
-            const rememberMe = document.getElementById('remember').checked;
-            
-            // Basic validation
-            if (!email) {
-                showError('Please enter your email');
-                return;
-            }
-            
-            if (!password) {
-                showError('Please enter your password');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showError('Password must be at least 6 characters');
-                return;
-            }
-            
-            try {
-                // Show loading state
-                loginButton.disabled = true;
-                buttonText.textContent = 'Logging in...';
-                spinner.style.display = 'block';
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
                 
-                // Sign in with Supabase
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-
-                if (error) throw error;
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+                const rememberMe = document.getElementById('remember').checked;
                 
-                // Get user profile
-                const { data: profile, error: profileError } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', data.user.id)
-                    .single();
-
-                if (profileError) throw profileError;
+                errorMessage.style.display = 'none';
+                document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
                 
-                // Store user data in localStorage
-                localStorage.setItem('user', JSON.stringify({
-                    id: data.user.id,
-                    email: data.user.email,
-                    username: profile.username,
-                    balance: profile.balance || 1000.00
-                }));
-                
-                // If "Remember me" is not checked, session will expire when browser is closed
-                if (!rememberMe) {
-                    // Set a shorter session expiration
-                    await supabase.auth.setSession({
-                        access_token: data.session.access_token,
-                        refresh_token: data.session.refresh_token
-                    });
+                if (!email) {
+                    showError('Please enter your email');
+                    return;
                 }
                 
-                // Show success message and redirect
-                successMessage.style.display = 'block';
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1500);
+                if (!password) {
+                    showError('Please enter your password');
+                    return;
+                }
                 
-            } catch (error) {
-                console.error('Login error:', error.message);
-                showError(error.message || 'Login failed. Please try again.');
-            } finally {
-                // Reset button state
-                loginButton.disabled = false;
-                buttonText.textContent = 'Login';
-                spinner.style.display = 'none';
-            }
-        }
-
-        // Social login handlers
-        async function handleSocialLogin(provider) {
-            try {
-                const { data, error } = await supabase.auth.signInWithOAuth({
-                    provider: provider,
-                    options: {
-                        redirectTo: window.location.origin + '/dashboard.html'
-                    }
-                });
-                
-                if (error) throw error;
-                
-            } catch (error) {
-                console.error(`${provider} login error:`, error.message);
-                showError(`Error with ${provider} login: ${error.message}`);
-            }
-        }
-
-        // Forgot password handler
-        async function handleForgotPassword(event) {
-            event.preventDefault();
-            const email = prompt('Please enter your email to reset your password:');
-            
-            if (email) {
                 try {
-                    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-                        redirectTo: window.location.origin + '/reset-password.html'
+                    loginButton.disabled = true;
+                    buttonText.textContent = 'Logging in...';
+                    spinner.style.display = 'block';
+                    
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password
                     });
 
                     if (error) throw error;
                     
-                    alert('If an account exists with this email, you will receive a password reset link.');
+                    const { data: profile, error: profileError } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', data.user.id)
+                        .single();
+
+                    if (profileError) throw profileError;
+                    
+                    localStorage.setItem('user', JSON.stringify({
+                        id: data.user.id,
+                        email: data.user.email,
+                        username: profile.username,
+                        balance: profile.balance || 1000.00
+                    }));
+                    
+                    successMessage.style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                    
                 } catch (error) {
-                    console.error('Password reset error:', error.message);
-                    alert('Error sending password reset email: ' + error.message);
+                    console.error('Login error:', error.message);
+                    showError(error.message || 'Login failed. Please try again.');
+                } finally {
+                    loginButton.disabled = false;
+                    buttonText.textContent = 'Login';
+                    spinner.style.display = 'none';
+                }
+            });
+
+            document.getElementById('googleLogin').addEventListener('click', () => handleSocialLogin('google'));
+            document.getElementById('facebookLogin').addEventListener('click', () => handleSocialLogin('facebook'));
+            document.getElementById('twitterLogin').addEventListener('click', () => handleSocialLogin('twitter'));
+
+            document.getElementById('forgotPassword').addEventListener('click', async function(e) {
+                e.preventDefault();
+                const email = prompt('Please enter your email to reset your password:');
+                
+                if (email) {
+                    try {
+                        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                            redirectTo: window.location.origin + '/reset-password.html'
+                        });
+
+                        if (error) throw error;
+                        alert('If an account exists with this email, you will receive a password reset link.');
+                    } catch (error) {
+                        console.error('Password reset error:', error.message);
+                        alert('Error: ' + error.message);
+                    }
+                }
+            });
+
+            async function handleSocialLogin(provider) {
+                try {
+                    const { error } = await supabase.auth.signInWithOAuth({
+                        provider: provider,
+                        options: {
+                            redirectTo: window.location.origin + '/dashboard.html'
+                        }
+                    });
+                    
+                    if (error) throw error;
+                    
+                } catch (error) {
+                    console.error(`${provider} login error:`, error.message);
+                    showError(`Error with ${provider} login: ${error.message}`);
                 }
             }
-        }
 
-        // Helper function to show error messages
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
-        }
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+            }
 
-        // Event Listeners
-        document.addEventListener('DOMContentLoaded', function() {
+            async function checkAuth() {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    window.location.href = 'dashboard.html';
+                }
+            }
+
             checkAuth();
-            
-            // Add animation to form elements
-            const formGroups = document.querySelectorAll('.form-group');
-            formGroups.forEach((group, index) => {
-                group.style.opacity = '0';
-                group.style.transform = 'translateY(20px)';
-                group.style.transition = `opacity 0.5s ease ${index * 0.1}s, transform 0.5s ease ${index * 0.1}s`;
-                
-                // Trigger reflow
-                void group.offsetWidth;
-                
-                // Add visible class
-                group.style.opacity = '1';
-                group.style.transform = 'translateY(0)';
-            });
         });
-
-        // Form submission
-        loginForm.addEventListener('submit', handleLogin);
-        
-        // Social login buttons
-        document.getElementById('googleLogin').addEventListener('click', () => handleSocialLogin('google'));
-        document.getElementById('facebookLogin').addEventListener('click', () => handleSocialLogin('facebook'));
-        document.getElementById('twitterLogin').addEventListener('click', () => handleSocialLogin('twitter'));
-        
-        // Forgot password
-        document.getElementById('forgotPassword').addEventListener('click', handleForgotPassword);
     </script>
 </body>
 </html>
