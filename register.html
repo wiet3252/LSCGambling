@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LSC Casino - Register</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         .bg-casino {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -97,9 +97,16 @@
         const successMessage = document.getElementById('successMessage');
 
         // Show message helper
-        function showMessage(element, message) {
+        function showMessage(element, message, isError = false) {
             element.textContent = message;
             element.classList.remove('hidden');
+            if (isError) {
+                element.classList.remove('bg-green-500/20', 'text-green-300');
+                element.classList.add('bg-red-500/20', 'text-red-300');
+            } else {
+                element.classList.remove('bg-red-500/20', 'text-red-300');
+                element.classList.add('bg-green-500/20', 'text-green-300');
+            }
             setTimeout(() => element.classList.add('hidden'), 5000);
         }
 
@@ -118,17 +125,17 @@
             
             // Validation
             if (!email || !username || !password || !confirmPassword) {
-                showMessage(errorMessage, 'Please fill in all fields');
+                showMessage(errorMessage, 'Please fill in all fields', true);
                 return;
             }
             
             if (password !== confirmPassword) {
-                showMessage(errorMessage, 'Passwords do not match');
+                showMessage(errorMessage, 'Passwords do not match', true);
                 return;
             }
             
             if (password.length < 6) {
-                showMessage(errorMessage, 'Password must be at least 6 characters');
+                showMessage(errorMessage, 'Password must be at least 6 characters', true);
                 return;
             }
             
@@ -183,7 +190,7 @@
                 
             } catch (error) {
                 console.error('Registration error:', error);
-                showMessage(errorMessage, error.message || 'Registration failed. Please try again.');
+                showMessage(errorMessage, error.message || 'Registration failed. Please try again.', true);
             } finally {
                 // Reset button state
                 registerButton.disabled = false;
