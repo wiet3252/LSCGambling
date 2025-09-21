@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LSC Casino - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .bg-casino {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-primary {
+            background: #e94560;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            background: #d13855;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(233, 69, 96, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-casino min-h-screen p-4">
+    <nav class="max-w-7xl mx-auto flex justify-between items-center py-4">
+        <h1 class="text-2xl font-bold text-white">LSC Casino</h1>
+        <div class="flex items-center space-x-4">
+            <span id="userBalance" class="text-white font-medium">Loading...</span>
+            <button id="logoutButton" class="text-pink-400 hover:underline">Logout</button>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto mt-12">
+        <div class="card rounded-xl p-8">
+            <h2 class="text-2xl font-bold text-white mb-6">Welcome, <span id="username">User</span>!</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Balance Card -->
+                <div class="bg-white/5 p-6 rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-300 mb-2">Your Balance</h3>
+                    <p class="text-3xl font-bold text-white" id="balanceAmount">$0.00</p>
+                </div>
+
+                <!-- Games -->
+                <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                    <a href="wheel.html" class="card p-6 text-center hover:bg-white/5 transition-colors">
+                        <div class="text-4xl mb-2">🎡</div>
+                        <h3 class="font-medium text-white">Wheel of Fortune</h3>
+                        <p class="text-sm text-gray-400 mt-1">Spin to win big!</p>
+                    </a>
+                    <a href="slots.html" class="card p-6 text-center hover:bg-white/5 transition-colors">
+                        <div class="text-4xl mb-2">🎰</div>
+                        <h3 class="font-medium text-white">Slots</h3>
+                        <p class="text-sm text-gray-400 mt-1">Try your luck!</p>
+                    </a>
+                    <a href="blackjack.html" class="card p-6 text-center hover:bg-white/5 transition-colors">
+                        <div class="text-4xl mb-2">🃏</div>
+                        <h3 class="font-medium text-white">Blackjack</h3>
+                        <p class="text-sm text-gray-400 mt-1">Beat the dealer!</p>
+                    </a>
+                    <a href="roulette.html" class="card p-6 text-center hover:bg-white/5 transition-colors">
+                        <div class="text-4xl mb-2">🎲</div>
+                        <h3 class="font-medium text-white">Roulette</h3>
+                        <p class="text-sm text-gray-400 mt-1">Bet on your luck!</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase setup
+        const SUPABASE_URL = 'https://tjbgvmwyllzixyeirwiw.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYmd2bXd5bGx6aXh5ZWlyd2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NTE1ODAsImV4cCI6MjA3NDAyNzU4MH0.o7kvQW1I0woi1NI3s8VcToEhT7JCSoJEL20UmpZG-rA';
+        
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: { persistSession: true }
+        });
+
+        // Elements
+        const usernameElement = document.getElementById('username');
+        const balanceElement = document.getElementById('balanceAmount');
+        const userBalanceElement = document.getElementById('userBalance');
+        const logoutButton = document.getElementById('logoutButton');
+
+        // Check if user is logged in
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Load user data
+            loadUserData();
+        }
+
+        // Load user data
+        async function loadUserData() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                
+                if (!user) {
+                    throw new Error('User not found');
+                }
+                
+                // Get user profile
+                const { data: profile, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (error) throw error;
+                
+                // Update UI
+                usernameElement.textContent = profile.username || 'Player';
+                balanceElement.textContent = `$${profile.balance?.toFixed(2) || '0.00'}`;
+                userBalanceElement.textContent = `Balance: $${profile.balance?.toFixed(2) || '0.00'}`;
+                
+                // Store user data in localStorage
+                localStorage.setItem('user', JSON.stringify({
+                    id: user.id,
+                    email: user.email,
+                    username: profile.username,
+                    balance: profile.balance || 0
+                }));
+                
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                alert('Failed to load user data. Please try again.');
+            }
+        }
+
+        // Logout
+        logoutButton.addEventListener('click', async () => {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) throw error;
+                
+                // Clear localStorage
+                localStorage.removeItem('user');
+                
+                // Redirect to login
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Failed to logout. Please try again.');
+            }
+        });
+
+        // Check auth status on page load
+        checkAuth();
+    </script>
+</body>
+</html>
